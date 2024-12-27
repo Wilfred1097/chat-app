@@ -23,6 +23,9 @@ let activeUsers = new Set();
 wss.on('connection', (ws) => {
     console.log('New connection');
 
+    // Send the chat history to the new client
+    ws.send(JSON.stringify({ type: 'chat-history', messages }));
+
     // Listen for username messages
     ws.on('message', (message) => {
         const data = JSON.parse(message);

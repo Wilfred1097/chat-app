@@ -58,24 +58,10 @@
                 username = data.username;
                 setCookie('username', username, 365);
                 document.getElementById('usernameHeader').textContent = `Welcome, ${username}`;
+            } else if (data.type === 'chat-history') {
+                displayMessages(data.messages);
             } else {
-                const messages = data;
-                const messagesDiv = document.getElementById('messages');
-                messages.forEach((message) => {
-                    const msgDiv = document.createElement('div');
-                    const timestamp = new Date(message.timestamp);
-                    const formattedTimestamp = timestamp.toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: 'numeric',
-                        hour12: true
-                    }).replace(',', '');
-                    msgDiv.textContent = `${message.user} ${formattedTimestamp}: ${message.text}`;
-                    messagesDiv.appendChild(msgDiv);
-                });
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                displayMessages(data);
             }
         };
 
@@ -100,6 +86,25 @@
             if (event.key === 'Enter') {
                 sendMessage();
             }
+        }
+
+        function displayMessages(messages) {
+            const messagesDiv = document.getElementById('messages');
+            messages.forEach((message) => {
+                const msgDiv = document.createElement('div');
+                const timestamp = new Date(message.timestamp);
+                const formattedTimestamp = timestamp.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                }).replace(',', '');
+                msgDiv.textContent = `${message.user} ${formattedTimestamp}: ${message.text}`;
+                messagesDiv.appendChild(msgDiv);
+            });
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         // Function to set a cookie
