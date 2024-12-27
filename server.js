@@ -26,7 +26,7 @@ wss.on('connection', (ws) => {
     // Send the chat history to the new client
     ws.send(JSON.stringify({ type: 'chat-history', messages }));
 
-    // Listen for username messages
+    // Listen for messages
     ws.on('message', (message) => {
         const data = JSON.parse(message);
 
@@ -54,6 +54,19 @@ wss.on('connection', (ws) => {
             wss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
                     client.send(JSON.stringify([msg]));
+                }
+            });
+        } else if (data.type === 'clear-chat' && ws.username === 'admin2025') {
+            // Clear messages if the user is admin2025
+            messages = [];
+
+            // Save the cleared messages to the JSON file
+            fs.writeFileSync(messagesFile, JSON.stringify(messages));
+
+            // Notify all clients to clear their chat history
+            wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: 'clear-chat' }));
                 }
             });
         }
