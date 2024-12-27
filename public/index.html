@@ -4,6 +4,8 @@
     <title>Chat App</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,6 +38,7 @@
         <button id="clearChatButton" class="btn btn-danger" onclick="clearChat()">Clear Chat</button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const ws = new WebSocket(`${protocol}://${window.location.host}`);
@@ -59,8 +62,13 @@
             const data = JSON.parse(event.data);
             
             if (data.type === 'username-taken') {
-                alert('Username is already taken. Please choose a different one.');
-                promptUsername();
+                Swal.fire({
+                    title: 'Username Taken',
+                    text: 'Username is already taken. Please choose a different one.',
+                    icon: 'error'
+                }).then(() => {
+                    promptUsername();
+                });
             } else if (data.type === 'username-accepted') {
                 username = data.username;
                 setCookie('username', username, 365);
@@ -78,8 +86,28 @@
         };
 
         function promptUsername() {
-            username = prompt("Please enter your username:");
-            ws.send(JSON.stringify({ type: 'username', username }));
+            Swal.fire({
+                title: 'Enter your username',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: false,
+                confirmButtonText: 'Submit',
+                showLoaderOnConfirm: true,
+                preConfirm: (username) => {
+                    if (!username) {
+                        Swal.showValidationMessage('You need to enter a username');
+                        return false;
+                    }
+                    ws.send(JSON.stringify({ type: 'username', username }));
+                    return username;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    username = result.value;
+                }
+            });
         }
 
         function sendMessage() {
