@@ -50,10 +50,7 @@
             if (!username) {
                 promptUsername();
             } else {
-                document.getElementById('usernameHeader').textContent = `Welcome, ${username}`;
-                if (username === 'admin2025') {
-                    document.getElementById('clearChatButton').style.display = 'block';
-                }
+                displayUsername(username);
                 ws.send(JSON.stringify({ type: 'username', username }));
             }
         };
@@ -72,10 +69,7 @@
             } else if (data.type === 'username-accepted') {
                 username = data.username;
                 setCookie('username', username, 365);
-                document.getElementById('usernameHeader').textContent = `Welcome, ${username}`;
-                if (username === 'admin2025') {
-                    document.getElementById('clearChatButton').style.display = 'block';
-                }
+                displayUsername(username);
             } else if (data.type === 'chat-history') {
                 displayMessages(data.messages);
             } else if (data.type === 'clear-chat') {
@@ -110,12 +104,20 @@
             });
         }
 
+        function displayUsername(username) {
+            const displayName = username === 'admin2025' ? 'Admin' : username;
+            document.getElementById('usernameHeader').textContent = `Welcome, ${displayName}`;
+            if (username === 'admin2025') {
+                document.getElementById('clearChatButton').style.display = 'block';
+            }
+        }
+
         function sendMessage() {
             const input = document.getElementById('messageInput');
             if (input.value.trim() === '') return; // Do not send empty messages
             const message = {
                 type: 'message',
-                username,
+                username: username === 'admin2025' ? 'Admin' : username,
                 text: input.value
             };
             ws.send(JSON.stringify(message));
@@ -141,7 +143,8 @@
                     minute: 'numeric',
                     hour12: true
                 }).replace(',', '');
-                msgDiv.textContent = `${message.user} ${formattedTimestamp}: ${message.text}`;
+                const displayName = message.user === 'admin2025' ? 'Admin' : message.user;
+                msgDiv.textContent = `${displayName} ${formattedTimestamp}: ${message.text}`;
                 messagesDiv.appendChild(msgDiv);
             });
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
